@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineBook — Your Cinema, Your Way</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #E8B84B;
+    --gold-dark: #C49A30;
+    --dark: #0A0A0F;
+    --dark2: #12121A;
+    --dark3: #1C1C28;
+    --card: #1A1A26;
+    --border: rgba(255,255,255,0.08);
+    --text: #F0EDE8;
+    --muted: rgba(240,237,232,0.5);
+    --accent: #E05252;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,15,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 64px;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--gold); letter-spacing: -0.5px; }
+  .logo span { color: var(--text); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--gold); color: var(--dark); padding: 0.5rem 1.2rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; transition: background 0.2s; }
+  .nav-cta:hover { background: var(--gold-dark); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0A0A0F 0%, #1a0a1a 50%, #0a0f1a 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 6rem 2rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(232,184,75,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 30%, rgba(224,82,82,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    background: rgba(232,184,75,0.12);
+    border: 1px solid rgba(232,184,75,0.3);
+    color: var(--gold);
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    padding: 0.4rem 1.2rem; border-radius: 100px; margin-bottom: 2rem;
+    display: inline-block;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 900; line-height: 1.05;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em { color: var(--gold); font-style: italic; }
+  .hero p { font-size: 1.1rem; color: var(--muted); max-width: 540px; margin: 0 auto 2.5rem; line-height: 1.7; }
+
+  /* SEARCH BAR */
+  .search-bar {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0.5rem;
+    display: flex; gap: 0.5rem; align-items: center;
+    max-width: 680px; width: 100%;
+    margin: 0 auto 3rem;
+  }
+  .search-bar input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-size: 1rem; font-family: 'DM Sans', sans-serif;
+    padding: 0.75rem 1rem;
+  }
+  .search-bar input::placeholder { color: var(--muted); }
+  .search-bar select {
+    background: var(--dark2); border: 1px solid var(--border); color: var(--text);
+    padding: 0.75rem 1rem; border-radius: 10px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; outline: none; cursor: pointer;
+    appearance: none;
+  }
+  .search-bar select option { background: var(--dark2); }
+  .search-btn {
+    background: var(--gold); color: var(--dark); border: none; border-radius: 10px;
+    padding: 0.75rem 1.5rem; font-weight: 700; font-size: 0.95rem;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .search-btn:hover { background: var(--gold-dark); }
+
+  /* GENRES */
+  .genres { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem; }
+  .genre-pill {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--muted); padding: 0.4rem 1rem; border-radius: 100px;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+  }
+  .genre-pill:hover, .genre-pill.active {
+    background: rgba(232,184,75,0.15); border-color: rgba(232,184,75,0.4);
+    color: var(--gold);
+  }
+
+  /* SECTION */
+  section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+  .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2.5rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; }
+  .section-sub { color: var(--muted); font-size: 0.9rem; }
+  .view-all { color: var(--gold); font-size: 0.9rem; text-decoration: none; font-weight: 500; }
+
+  /* MOVIES GRID */
+  .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+  .movie-card {
+    background: var(--card); border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: transform 0.3s, border-color 0.3s;
+    position: relative;
+  }
+  .movie-card:hover { transform: translateY(-6px); border-color: rgba(232,184,75,0.3); }
+  .movie-poster {
+    width: 100%; aspect-ratio: 2/3;
+    display: flex; align-items: flex-end; justify-content: center;
+    position: relative; overflow: hidden;
+    font-size: 4rem;
+  }
+  .poster-bg {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 5rem;
+  }
+  .poster-gradient {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
+    background: linear-gradient(transparent, var(--card));
+  }
+  .movie-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--accent); color: #fff;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
+    padding: 3px 8px; border-radius: 4px; text-transform: uppercase;
+  }
+  .movie-badge.new { background: var(--gold); color: var(--dark); }
+  .movie-info { padding: 1rem; }
+  .movie-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.4rem; line-height: 1.3; }
+  .movie-meta { color: var(--muted); font-size: 0.8rem; display: flex; gap: 0.75rem; align-items: center; }
+  .rating { color: var(--gold); font-weight: 600; }
+  .movie-rating-row { display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem; }
+  .stars { color: var(--gold); font-size: 0.75rem; }
+  .book-btn {
+    width: 100%; margin-top: 0.75rem;
+    background: rgba(232,184,75,0.1); border: 1px solid rgba(232,184,75,0.3);
+    color: var(--gold); padding: 0.5rem; border-radius: 8px;
+    font-weight: 600; font-size: 0.85rem; cursor: pointer;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+  }
+  .book-btn:hover { background: var(--gold); color: var(--dark); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--dark3); border: 1px solid var(--border);
+    border-radius: 20px; max-width: 600px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    transform: translateY(24px); transition: transform 0.3s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; }
+  .close-btn { background: none; border: none; color: var(--muted); font-size: 1.5rem; cursor: pointer; }
+  .modal-body { padding: 1.5rem; }
+
+  /* SEATS */
+  .screen { background: rgba(232,184,75,0.1); border: 1px solid rgba(232,184,75,0.3); color: var(--gold); text-align: center; padding: 0.4rem; border-radius: 4px; margin-bottom: 2rem; font-size: 0.8rem; letter-spacing: 2px; font-weight: 600; }
+  .seat-grid { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-bottom: 1.5rem; }
+  .seat-row { display: flex; gap: 6px; align-items: center; }
+  .row-label { color: var(--muted); font-size: 0.75rem; width: 16px; text-align: center; }
+  .seat {
+    width: 30px; height: 26px; border-radius: 5px 5px 2px 2px;
+    border: 1px solid var(--border); cursor: pointer;
+    background: rgba(255,255,255,0.05);
+    transition: all 0.15s; position: relative;
+  }
+  .seat:hover:not(.booked) { background: rgba(232,184,75,0.2); border-color: rgba(232,184,75,0.5); }
+  .seat.selected { background: var(--gold); border-color: var(--gold); }
+  .seat.booked { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.04); cursor: not-allowed; opacity: 0.4; }
+  .seat.premium { border-color: rgba(224,82,82,0.4); }
+  .seat.premium.selected { background: var(--accent); border-color: var(--accent); }
+  .seat-gap { width: 16px; }
+  .legend { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--muted); }
+  .legend-dot { width: 18px; height: 16px; border-radius: 3px; }
+
+  /* SHOWTIMES */
+  .showtimes { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .showtime-btn {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; cursor: pointer;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif; font-weight: 500;
+  }
+  .showtime-btn:hover, .showtime-btn.active { background: rgba(232,184,75,0.15); border-color: rgba(232,184,75,0.4); color: var(--gold); }
+
+  /* SUMMARY */
+  .booking-summary {
+    background: var(--card); border-radius: 12px; padding: 1.25rem;
+    border: 1px solid var(--border); margin-top: 1rem;
+  }
+  .summary-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.4rem 0; }
+  .summary-row.total { border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 0.75rem; font-weight: 600; font-size: 1rem; color: var(--gold); }
+  .confirm-btn {
+    width: 100%; margin-top: 1.25rem;
+    background: var(--gold); color: var(--dark);
+    border: none; border-radius: 10px; padding: 0.85rem;
+    font-weight: 700; font-size: 1rem; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: background 0.2s;
+  }
+  .confirm-btn:hover { background: var(--gold-dark); }
+  .confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* SUCCESS */
+  .success-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.9); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.4s;
+  }
+  .success-overlay.open { opacity: 1; pointer-events: all; }
+  .success-card {
+    background: var(--dark3); border: 1px solid rgba(232,184,75,0.3);
+    border-radius: 24px; padding: 3rem 2.5rem; text-align: center; max-width: 420px; width: 90%;
+  }
+  .success-icon { font-size: 3.5rem; margin-bottom: 1.5rem; display: block; }
+  .success-card h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 0.75rem; color: var(--gold); }
+  .success-card p { color: var(--muted); line-height: 1.6; }
+  .booking-ref { background: var(--card); border-radius: 8px; padding: 0.75rem 1.5rem; margin: 1.5rem 0; font-family: monospace; font-size: 1.2rem; color: var(--gold); letter-spacing: 2px; }
+  .done-btn { background: var(--gold); color: var(--dark); border: none; border-radius: 10px; padding: 0.85rem 2.5rem; font-weight: 700; font-size: 1rem; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  /* DATE PICKER */
+  .date-picker { display: flex; gap: 0.6rem; margin-bottom: 1.5rem; overflow-x: auto; padding-bottom: 4px; }
+  .date-btn {
+    min-width: 56px; text-align: center; background: var(--card);
+    border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem 0.75rem;
+    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  }
+  .date-btn .day-name { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .date-btn .day-num { font-size: 1.1rem; font-weight: 600; margin-top: 2px; }
+  .date-btn:hover, .date-btn.active { background: rgba(232,184,75,0.15); border-color: rgba(232,184,75,0.4); }
+  .date-btn.active .day-num { color: var(--gold); }
+
+  /* STATS BAR */
+  .stats-bar {
+    background: var(--dark2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); font-weight: 700; }
+  .stat-label { color: var(--muted); font-size: 0.8rem; margin-top: 0.2rem; }
+
+  /* FOOTER */
+  footer { background: var(--dark2); border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
+  footer .footer-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold); margin-bottom: 0.5rem; }
+
+  @media (max-width: 600px) {
+    .search-bar { flex-direction: column; }
+    .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .movies-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    nav { padding: 0 1rem; }
+    .nav-links { display: none; }
+    .stats-bar { gap: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Cine<span>Book</span></div>
+  <ul class="nav-links">
+    <li><a href="#">Now Showing</a></li>
+    <li><a href="#">Coming Soon</a></li>
+    <li><a href="#">Cinemas</a></li>
+    <li><a href="#">Offers</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('nowShowing').scrollIntoView({behavior:'smooth'})">Book Now</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">✦ Premium Cinema Experience</div>
+  <h1>Book Your<br><em>Perfect</em> Movie<br>Night</h1>
+  <p>From blockbusters to indie gems — find showtimes at cinemas near you and book in seconds.</p>
+
+  <div class="search-bar">
+    <input type="text" placeholder="Search movies, genres, actors..." id="searchInput" oninput="filterMovies()">
+    <select id="genreFilter" onchange="filterMovies()">
+      <option value="">All Genres</option>
+      <option value="action">Action</option>
+      <option value="drama">Drama</option>
+      <option value="comedy">Comedy</option>
+      <option value="thriller">Thriller</option>
+      <option value="sci-fi">Sci-Fi</option>
+      <option value="horror">Horror</option>
+      <option value="romance">Romance</option>
+    </select>
+    <button class="search-btn" onclick="filterMovies()">Search</button>
+  </div>
+
+  <div class="genres">
+    <div class="genre-pill active" onclick="setGenre(this,'')">All</div>
+    <div class="genre-pill" onclick="setGenre(this,'action')">Action</div>
+    <div class="genre-pill" onclick="setGenre(this,'drama')">Drama</div>
+    <div class="genre-pill" onclick="setGenre(this,'comedy')">Comedy</div>
+    <div class="genre-pill" onclick="setGenre(this,'thriller')">Thriller</div>
+    <div class="genre-pill" onclick="setGenre(this,'sci-fi')">Sci-Fi</div>
+    <div class="genre-pill" onclick="setGenre(this,'horror')">Horror</div>
+    <div class="genre-pill" onclick="setGenre(this,'romance')">Romance</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Movies</div></div>
+  <div class="stat"><div class="stat-num">12</div><div class="stat-label">Cinemas</div></div>
+  <div class="stat"><div class="stat-num">4.8★</div><div class="stat-label">Average Rating</div></div>
+  <div class="stat"><div class="stat-num">2M+</div><div class="stat-label">Tickets Booked</div></div>
+</div>
+
+<!-- NOW SHOWING -->
+<section id="nowShowing">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Now Showing</div>
+      <div class="section-sub">Playing in cinemas this week</div>
+    </div>
+    <a href="#" class="view-all">View all →</a>
+  </div>
+  <div class="movies-grid" id="moviesGrid"></div>
+</section>
+
+<!-- COMING SOON -->
+<section>
+  <div class="section-header">
+    <div>
+      <div class="section-title">Coming Soon</div>
+      <div class="section-sub">Reserve your seats early</div>
+    </div>
+  </div>
+  <div class="movies-grid" id="comingGrid"></div>
+</section>
+
+<footer>
+  <div class="footer-logo">CineBook</div>
+  <p>© 2026 CineBook. All rights reserved. Your cinema, your way.</p>
+</footer>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Book Tickets</h2>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="modalGenre" style="color:var(--muted);font-size:0.85rem;margin-bottom:1.2rem;"></p>
+
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.5rem;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;">Select Date</p>
+      <div class="date-picker" id="datePicker"></div>
+
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.5rem;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;">Select Showtime</p>
+      <div class="showtimes" id="showtimes"></div>
+
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;">Choose Seats</p>
+      <div class="screen">SCREEN</div>
+      <div class="seat-grid" id="seatGrid"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);"></div>Available</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gold);"></div>Selected</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.03);opacity:0.4;"></div>Booked</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(224,82,82,0.1);border:1px solid rgba(224,82,82,0.4);"></div>Premium</div>
+      </div>
+
+      <div class="booking-summary" id="bookingSummary">
+        <div class="summary-row"><span style="color:var(--muted)">Movie</span><span id="sumMovie">—</span></div>
+        <div class="summary-row"><span style="color:var(--muted)">Date & Time</span><span id="sumTime">—</span></div>
+        <div class="summary-row"><span style="color:var(--muted)">Seats</span><span id="sumSeats">None selected</span></div>
+        <div class="summary-row"><span style="color:var(--muted)">Standard (₹200 each)</span><span id="sumStd">₹0</span></div>
+        <div class="summary-row"><span style="color:var(--muted)">Premium (₹350 each)</span><span id="sumPrem">₹0</span></div>
+        <div class="summary-row total"><span>Total</span><span id="sumTotal">₹0</span></div>
+      </div>
+      <button class="confirm-btn" id="confirmBtn" onclick="confirmBooking()" disabled>Select seats to continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <span class="success-icon">🎬</span>
+    <h2>Booking Confirmed!</h2>
+    <p>Your tickets are booked. Check your email for the confirmation and QR code.</p>
+    <div class="booking-ref" id="bookingRef">CB-000000</div>
+    <p id="successDetails" style="font-size:0.9rem;color:var(--muted);margin-bottom:1.5rem;"></p>
+    <button class="done-btn" onclick="closeSucess()">Done</button>
+  </div>
+</div>
+
+<script>
+const movies = [
+  { id:1, title:"Dune: Messiah", genre:"sci-fi", rating:9.1, year:2026, duration:"2h 45m", emoji:"🏜️", badge:"HOT", color:"#2a1a0a" },
+  { id:2, title:"The Last Detective", genre:"thriller", rating:8.4, year:2026, duration:"1h 58m", emoji:"🔍", badge:"", color:"#0a1020" },
+  { id:3, title:"Neon Nights", genre:"action", rating:7.9, year:2026, duration:"2h 10m", emoji:"⚡", badge:"NEW", color:"#0a0a20" },
+  { id:4, title:"Laughing Out Loud", genre:"comedy", rating:8.2, year:2026, duration:"1h 45m", emoji:"😂", badge:"", color:"#1a100a" },
+  { id:5, title:"Heartstrings", genre:"romance", rating:8.6, year:2026, duration:"2h 05m", emoji:"❤️", badge:"NEW", color:"#1a0a10" },
+  { id:6, title:"Dark Waters", genre:"horror", rating:7.7, year:2026, duration:"1h 50m", emoji:"🌊", badge:"", color:"#050a0a" },
+  { id:7, title:"The Wandering Eye", genre:"drama", rating:9.0, year:2026, duration:"2h 20m", emoji:"🎭", badge:"HOT", color:"#100a1a" },
+  { id:8, title:"Steel Horizon", genre:"action", rating:8.1, year:2026, duration:"2h 15m", emoji:"🚀", badge:"", color:"#0a1015" },
+];
+
+const coming = [
+  { id:9, title:"Phantom Protocol", genre:"thriller", rating:0, year:2026, duration:"2h 30m", emoji:"👁️", badge:"APR", color:"#0f0a15" },
+  { id:10, title:"Skybound", genre:"sci-fi", rating:0, year:2026, duration:"2h 50m", emoji:"🌌", badge:"MAY", color:"#050a15" },
+  { id:11, title:"The Grand Heist", genre:"action", rating:0, year:2026, duration:"2h 05m", emoji:"💎", badge:"APR", color:"#15100a" },
+  { id:12, title:"Summer Fling", genre:"romance", rating:0, year:2026, duration:"1h 55m", emoji:"🌺", badge:"JUN", color:"#150a10" },
+];
+
+const times = ["10:00 AM","12:45 PM","3:30 PM","6:15 PM","9:00 PM","11:45 PM"];
+let selectedMovie = null, selectedSeats = [], selectedTime = times[2], selectedDate = 0;
+let bookedSeats = {};
+
+function renderMovies(list, containerId, isComingSoon=false) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  list.forEach(m => {
+    const stars = m.rating > 0 ? '★'.repeat(Math.round(m.rating/2)) + '☆'.repeat(5-Math.round(m.rating/2)) : '—';
+    const badgeHtml = m.badge ? `<div class="movie-badge ${m.badge==='NEW'?'new':''}">${m.badge}</div>` : '';
+    container.innerHTML += `
+      <div class="movie-card" onclick="${isComingSoon?'':'openModal('+m.id+')'}">
+        <div class="movie-poster" style="background:${m.color}">
+          <div class="poster-bg">${m.emoji}</div>
+          <div class="poster-gradient"></div>
+          ${badgeHtml}
+        </div>
+        <div class="movie-info">
+          <div class="movie-rating-row">
+            <span class="stars">${stars}</span>
+            ${m.rating > 0 ? `<span class="rating" style="font-size:0.8rem;">${m.rating}</span>` : ''}
+          </div>
+          <div class="movie-title">${m.title}</div>
+          <div class="movie-meta">
+            <span>${m.genre.charAt(0).toUpperCase()+m.genre.slice(1)}</span>
+            <span>·</span>
+            <span>${m.duration}</span>
+          </div>
+          ${!isComingSoon ? `<button class="book-btn" onclick="event.stopPropagation();openModal(${m.id})">Book Tickets</button>` : `<button class="book-btn" style="opacity:0.5;cursor:not-allowed">Coming ${m.badge}</button>`}
+        </div>
+      </div>`;
+  });
+}
+
+function filterMovies() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const g = document.getElementById('genreFilter').value;
+  const filtered = movies.filter(m =>
+    (m.title.toLowerCase().includes(q) || m.genre.includes(q)) &&
+    (!g || m.genre === g)
+  );
+  renderMovies(filtered, 'moviesGrid');
+}
+
+function setGenre(el, genre) {
+  document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('genreFilter').value = genre;
+  filterMovies();
+}
+
+function openModal(id) {
+  selectedMovie = movies.find(m => m.id === id);
+  selectedSeats = [];
+  selectedTime = times[2];
+  selectedDate = 0;
+  if (!bookedSeats[id]) {
+    const booked = [];
+    for(let i=0;i<8;i++) {
+      const r = Math.floor(Math.random()*5);
+      const c = Math.floor(Math.random()*9);
+      booked.push(`${r}-${c}`);
+    }
+    bookedSeats[id] = booked;
+  }
+  document.getElementById('modalTitle').textContent = selectedMovie.title;
+  document.getElementById('modalGenre').textContent = `${selectedMovie.genre.charAt(0).toUpperCase()+selectedMovie.genre.slice(1)} · ${selectedMovie.duration} · ${selectedMovie.year}`;
+  buildDatePicker();
+  buildShowtimes();
+  buildSeats();
+  updateSummary();
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOnBg(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function buildDatePicker() {
+  const dp = document.getElementById('datePicker');
+  dp.innerHTML = '';
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const now = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now); d.setDate(now.getDate() + i);
+    const btn = document.createElement('div');
+    btn.className = 'date-btn' + (i===selectedDate?' active':'');
+    btn.innerHTML = `<div class="day-name">${days[d.getDay()]}</div><div class="day-num">${d.getDate()}</div>`;
+    btn.onclick = () => { selectedDate = i; buildDatePicker(); updateSummary(); };
+    dp.appendChild(btn);
+  }
+}
+
+function buildShowtimes() {
+  const st = document.getElementById('showtimes');
+  st.innerHTML = '';
+  times.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'showtime-btn' + (t===selectedTime?' active':'');
+    btn.textContent = t;
+    btn.onclick = () => { selectedTime = t; buildShowtimes(); updateSummary(); };
+    st.appendChild(btn);
+  });
+}
+
+function buildSeats() {
+  const grid = document.getElementById('seatGrid');
+  grid.innerHTML = '';
+  const rows = ['A','B','C','D','E'];
+  const isPremium = (r) => r < 2;
+  rows.forEach((rowLabel, ri) => {
+    const row = document.createElement('div');
+    row.className = 'seat-row';
+    const lbl = document.createElement('div');
+    lbl.className = 'row-label'; lbl.textContent = rowLabel;
+    row.appendChild(lbl);
+    for (let ci = 0; ci < 9; ci++) {
+      if (ci === 4) {
+        const gap = document.createElement('div');
+        gap.className = 'seat-gap';
+        row.appendChild(gap);
+      }
+      const seatId = `${ri}-${ci}`;
+      const seat = document.createElement('div');
+      const prem = isPremium(ri);
+      const booked = bookedSeats[selectedMovie.id].includes(seatId);
+      const sel = selectedSeats.includes(seatId);
+      seat.className = 'seat' + (prem?' premium':'') + (booked?' booked':'') + (sel?' selected':'');
+      if (!booked) {
+        seat.onclick = () => toggleSeat(seatId, prem);
+      }
+      row.appendChild(seat);
+    }
+    grid.appendChild(row);
+  });
+}
+
+function toggleSeat(id, isPremium) {
+  const idx = selectedSeats.indexOf(id);
+  if (idx > -1) selectedSeats.splice(idx, 1);
+  else if (selectedSeats.length < 8) selectedSeats.push(id);
+  buildSeats();
+  updateSummary();
+}
+
+function updateSummary() {
+  const now = new Date(); now.setDate(now.getDate() + selectedDate);
+  const dateStr = now.toLocaleDateString('en-IN', {weekday:'short', month:'short', day:'numeric'});
+  document.getElementById('sumMovie').textContent = selectedMovie ? selectedMovie.title : '—';
+  document.getElementById('sumTime').textContent = `${dateStr}, ${selectedTime}`;
+
+  const rows = ['A','B','C','D','E'];
+  const seatLabels = selectedSeats.map(s => {
+    const [r, c] = s.split('-').map(Number);
+    const col = c >= 4 ? c + 1 : c + 1;
+    return `${rows[r]}${col}`;
+  });
+  document.getElementById('sumSeats').textContent = seatLabels.length ? seatLabels.join(', ') : 'None selected';
+
+  let std = 0, prem = 0;
+  selectedSeats.forEach(s => {
+    const r = parseInt(s.split('-')[0]);
+    if (r < 2) prem++; else std++;
+  });
+  document.getElementById('sumStd').textContent = `₹${std * 200}`;
+  document.getElementById('sumPrem').textContent = `₹${prem * 350}`;
+  const total = std * 200 + prem * 350;
+  document.getElementById('sumTotal').textContent = `₹${total}`;
+
+  const btn = document.getElementById('confirmBtn');
+  if (selectedSeats.length > 0) {
+    btn.disabled = false;
+    btn.textContent = `Confirm Booking — ₹${total}`;
+  } else {
+    btn.disabled = true;
+    btn.textContent = 'Select seats to continue';
+  }
+}
+
+function confirmBooking() {
+  const ref = 'CB-' + Math.random().toString(36).substr(2,6).toUpperCase();
+  document.getElementById('bookingRef').textContent = ref;
+  const now = new Date(); now.setDate(now.getDate() + selectedDate);
+  const dateStr = now.toLocaleDateString('en-IN', {weekday:'long', month:'long', day:'numeric'});
+  const rows = ['A','B','C','D','E'];
+  const seatLabels = selectedSeats.map(s => {
+    const [r, c] = s.split('-').map(Number);
+    return `${rows[r]}${c >= 4 ? c + 1 : c + 1}`;
+  }).join(', ');
+  document.getElementById('successDetails').textContent = `${selectedMovie.title} · ${dateStr} · ${selectedTime} · Seats: ${seatLabels}`;
+  closeModal();
+  document.getElementById('successOverlay').classList.add('open');
+}
+
+function closeSucess() {
+  document.getElementById('successOverlay').classList.remove('open');
+}
+
+renderMovies(movies, 'moviesGrid');
+renderMovies(coming, 'comingGrid', true);
+</script>
+</body>
+</html>
